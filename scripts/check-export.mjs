@@ -27,6 +27,11 @@ const expectedArtifactFiles = [
   "millwork_solver-0.1.0-py3-none-any.whl",
   "millwork_solver-0.1.0.tar.gz",
 ];
+const expectedRepositorySupportOverlay = [
+  ".github/repository-description.txt",
+  "SECURITY.md",
+  "SUPPORT.md",
+];
 const expectedArtifactBindings = {
   "millwork_solver-0.1.0-py3-none-any.whl": {
     kind: "wheel",
@@ -194,7 +199,11 @@ export function validateExport(root = repositoryRoot) {
   const actualPaths = listFiles(root);
   assert.deepEqual(
     actualPaths,
-    ["export-manifest.json", ...manifestPaths].toSorted((a, b) => a.localeCompare(b)),
+    [
+      "export-manifest.json",
+      ...manifestPaths,
+      ...expectedRepositorySupportOverlay,
+    ].toSorted((a, b) => a.localeCompare(b)),
     "public export inventory drifted",
   );
   for (const entry of manifest.files) {

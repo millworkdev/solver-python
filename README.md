@@ -20,6 +20,9 @@ package is licensed under Apache-2.0.
 This is a purpose-built public publishing repository. The release candidate is
 represented by the exact wheel and source distribution in `dist/`; the
 workflow never rebuilds them. `export-manifest.json` records their hashes and
-the closed public file inventory.
+the closed publishing-export inventory. The exact repository support overlay is
+validated separately from the retained release artifacts.
 
 See [PUBLISHING.md](PUBLISHING.md) for the operator-only release boundary.
+For non-sensitive questions, see [SUPPORT.md](SUPPORT.md). Report sensitive
+security concerns through the route described in [SECURITY.md](SECURITY.md).

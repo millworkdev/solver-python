@@ -115,8 +115,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "87efe4a425eaba6bcb4a70cff3b35e3edd5046c0cfbca85fa90eca20cfccdd95",
-      "size_bytes": 959
+      "sha256": "d441093a228b1e1fda4585035553cf0543182bd334965697dfc479262ae2f113",
+      "size_bytes": 1216
     },
     {
       "path": "scripts/authorization-payload.mjs",
@@ -125,8 +125,8 @@
     },
     {
       "path": "scripts/check-export.mjs",
-      "sha256": "5828817f48023ff10c46cd0b62c69b3785e1af140188b7318aad335520f3528a",
-      "size_bytes": 12429
+      "sha256": "f9799d7b96d48c5edb565457afedb6bdd1ad24102ec2fa43e6ff055df330b648",
+      "size_bytes": 12610
     },
     {
       "path": "scripts/check-publish-preconditions.mjs",
