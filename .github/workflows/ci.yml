@@ -1,0 +1,94 @@
+# Read-only checks for the prepared public export. No job publishes, uses a
+# credential, calls SolverAPI, or changes repository/registry configuration.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["20.x", "22.x"]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Validate the closed export and exact artifacts
+        run: node scripts/check-export.mjs
+
+      - name: Exercise export drift negatives
+        run: node --test scripts/test-export.mjs
+
+      - name: Exercise publish-precondition negatives without a registry call
+        run: node --test scripts/test-publish-preconditions.mjs
+
+  installed-artifacts:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        artifact-kind: [wheel, sdist]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up CPython
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Select the retained artifact without rebuilding
+        id: artifact
+        env:
+          ARTIFACT_KIND: ${{ matrix.artifact-kind }}
+        run: |
+          set -euo pipefail
+          if [ "$ARTIFACT_KIND" = wheel ]; then
+            echo "path=dist/millwork_solver-0.1.0-py3-none-any.whl" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=dist/millwork_solver-0.1.0.tar.gz" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clean-install the exact retained artifact
+        env:
+          ARTIFACT_PATH: ${{ steps.artifact.outputs.path }}
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/clean-install"
+          "$RUNNER_TEMP/clean-install/bin/python" -m pip install --disable-pip-version-check "$ARTIFACT_PATH"
+          "$RUNNER_TEMP/clean-install/bin/python" scripts/smoke-installed.py
+
+  workflow-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Run checksum-pinned actionlint
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --location --output actionlint.tar.gz \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  actionlint.tar.gz" | sha256sum --check
+          tar -xzf actionlint.tar.gz actionlint
+          ./actionlint
