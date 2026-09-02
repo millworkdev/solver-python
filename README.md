@@ -1,7 +1,25 @@
-# solver-python
+# Millwork Solver for Python
 
-Public publishing repository for the `millwork-solver` Python package (PyPI).
+`millwork-solver` is the Python client for the Millwork API. It provides
+separate synchronous and asynchronous clients:
 
-This repository holds the curated public export and the pinned publish
-workflow only. The canonical engineering source is private. No support or
-issue tracking happens here; no installation path is published yet.
+```python
+from millwork_solver import AsyncSolver, Solver
+```
+
+This repository carries reviewed release artifacts. Availability is established
+only when the exact version resolves from PyPI and its registry bytes and
+installed behavior pass the retained verification matrix; repository contents
+alone are not availability evidence.
+
+The supported candidate matrix is CPython 3.11, 3.12, 3.13, and 3.14. The
+package is licensed under Apache-2.0.
+
+## Repository boundary
+
+This is a purpose-built public publishing repository. The release candidate is
+represented by the exact wheel and source distribution in `dist/`; the
+workflow never rebuilds them. `export-manifest.json` records their hashes and
+the closed public file inventory.
+
+See [PUBLISHING.md](PUBLISHING.md) for the operator-only release boundary.

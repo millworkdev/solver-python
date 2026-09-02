@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "manifest_id": "millworkdev.solver-python.publish-preparation.v1",
+  "status": "prepared_not_authorized",
+  "repository": {
+    "coordinate": "millworkdev/solver-python",
+    "visibility": "public",
+    "default_branch": "main"
+  },
+  "identity": {
+    "distribution": "millwork-solver",
+    "import_package": "millwork_solver",
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "supported_cpython": [
+      "3.11",
+      "3.12",
+      "3.13",
+      "3.14"
+    ]
+  },
+  "artifacts": [
+    {
+      "filename": "millwork_solver-0.1.0-py3-none-any.whl",
+      "kind": "wheel",
+      "sha256": "e177ec7ca91edcb7f1db5f87ccfdae6d4eb3b17d0d7c3047015ad2af694bd3a7",
+      "size_bytes": 68530
+    },
+    {
+      "filename": "millwork_solver-0.1.0.tar.gz",
+      "kind": "sdist",
+      "sha256": "bf8652181e49cbb407bf8dc59ce638e49f7ba8e268619df677cd4621021530e7",
+      "size_bytes": 15177
+    }
+  ],
+  "candidate_evidence": {
+    "status": "READY",
+    "packet_sha256": "1640792bfae0f009efa3fe491c9da2a7d3e99788887dc3fae2116a285b2c3efb",
+    "operation_snapshot_sha256": "2b7d07eb77f32fe9913ec8391060c5773fb168add07a457b1656881f6c1c8ad2",
+    "behavior_drift_validated": true,
+    "supply_chain_checks_passed": true
+  },
+  "workflow_binding": {
+    "path": ".github/workflows/publish.yml",
+    "environment": "pypi-publish",
+    "runner": "ubuntu-24.04",
+    "publish_action": "pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33",
+    "authorization_payload_schema": "millworkdev.solver-python.bounded-publish-authorization.v1",
+    "authorization_max_lifetime_seconds": 86400,
+    "authorization_actions": [
+      "publish_retained_artifacts",
+      "verify_published_artifacts"
+    ]
+  },
+  "verification": {
+    "registry_hash_comparison_required": true,
+    "clean_install_artifact_kinds": [
+      "wheel",
+      "sdist"
+    ],
+    "clean_install_cpython": [
+      "3.11",
+      "3.12",
+      "3.13",
+      "3.14"
+    ],
+    "sync_echo_required": true,
+    "async_echo_required": true,
+    "result_content_expected": false
+  },
+  "publication": {
+    "project_created": false,
+    "trusted_publisher_configured": false,
+    "environment_configured": false,
+    "workflow_dispatched": false,
+    "published": false,
+    "credential_used": false,
+    "external_mutation_performed": false
+  },
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "370df9cfa960ba9d88eaf0687b0154b100a4829eb78dd7af852c8b93e0e3b5bd",
+      "size_bytes": 3141
+    },
+    {
+      "path": ".github/workflows/publish.yml",
+      "sha256": "20ddf9a3310fb2cb6e4b24bd9ea1911c083ae20aa8b8c859dc31064adfea5dee",
+      "size_bytes": 5993
+    },
+    {
+      "path": "dist/millwork_solver-0.1.0-py3-none-any.whl",
+      "sha256": "e177ec7ca91edcb7f1db5f87ccfdae6d4eb3b17d0d7c3047015ad2af694bd3a7",
+      "size_bytes": 68530
+    },
+    {
+      "path": "dist/millwork_solver-0.1.0.tar.gz",
+      "sha256": "bf8652181e49cbb407bf8dc59ce638e49f7ba8e268619df677cd4621021530e7",
+      "size_bytes": 15177
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "size_bytes": 11357
+    },
+    {
+      "path": "publish-binding.json",
+      "sha256": "ff6057c80d5995b91c44551b8e7049dbf2243b7a2052bd21557b9a2bf0706a46",
+      "size_bytes": 780
+    },
+    {
+      "path": "PUBLISHING.md",
+      "sha256": "1265e518c45de7631eb90bf90713ba25f448cf3f69eb5c29aeb49094a78303ed",
+      "size_bytes": 2842
+    },
+    {
+      "path": "README.md",
+      "sha256": "87efe4a425eaba6bcb4a70cff3b35e3edd5046c0cfbca85fa90eca20cfccdd95",
+      "size_bytes": 959
+    },
+    {
+      "path": "scripts/authorization-payload.mjs",
+      "sha256": "6e02f0fb0573aac67265ff3ef4e15284402dc2985b450d499c75e0bc47ca6ddc",
+      "size_bytes": 5510
+    },
+    {
+      "path": "scripts/check-export.mjs",
+      "sha256": "5828817f48023ff10c46cd0b62c69b3785e1af140188b7318aad335520f3528a",
+      "size_bytes": 12429
+    },
+    {
+      "path": "scripts/check-publish-preconditions.mjs",
+      "sha256": "0383fee9c383c65d53d7d31705bb5a66292094332f05e7f183acf7b2204040c1",
+      "size_bytes": 7843
+    },
+    {
+      "path": "scripts/live-echo.py",
+      "sha256": "82928db04d998953f0ecb74367702ad6b0856889a8431affcc6b100249a6fcff",
+      "size_bytes": 3407
+    },
+    {
+      "path": "scripts/smoke-installed.py",
+      "sha256": "5ade80896c84083f4788f452dcdb3fe43fa79f0dcd6b964bc031adeacb8585d6",
+      "size_bytes": 2496
+    },
+    {
+      "path": "scripts/test-export.mjs",
+      "sha256": "1d6a594247f418163bdaaa2bafc1de8ef97aac9cd4da1395219e2365ab09ecf8",
+      "size_bytes": 7681
+    },
+    {
+      "path": "scripts/test-publish-preconditions.mjs",
+      "sha256": "a7795d215221fa3004911258e62b422398512eb91b1e1345f6c6a12b2cf02b16",
+      "size_bytes": 12853
+    },
+    {
+      "path": "scripts/verify-published-release.py",
+      "sha256": "c20b5349172f719a87df7c1faec2c95a7126fff4c7e6b550844c6f8e7bc47246",
+      "size_bytes": 4634
+    }
+  ]
+}
