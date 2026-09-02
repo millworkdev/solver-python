@@ -23,3 +23,5 @@ workflow never rebuilds them. `export-manifest.json` records their hashes and
 the closed public file inventory.
 
 See [PUBLISHING.md](PUBLISHING.md) for the operator-only release boundary.
+For non-sensitive questions, see [SUPPORT.md](SUPPORT.md). Report sensitive
+security concerns through the route described in [SECURITY.md](SECURITY.md).
