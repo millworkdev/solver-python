@@ -37,6 +37,9 @@ jobs:
       - name: Exercise publish-precondition negatives without a registry call
         run: node --test scripts/test-publish-preconditions.mjs
 
+      - name: Exercise the verification failure path without a registry call
+        run: node --test scripts/test-verification-failure-path.mjs
+
   installed-artifacts:
     strategy:
       fail-fast: false

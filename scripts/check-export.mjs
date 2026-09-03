@@ -187,8 +187,12 @@ export function validateExport(root = repositoryRoot) {
     registry_hash_comparison_required: true,
     clean_install_artifact_kinds: ["wheel", "sdist"],
     clean_install_cpython: ["3.11", "3.12", "3.13", "3.14"],
+    installed_surface_smoke_required: true,
     sync_echo_required: true,
     async_echo_required: true,
+    live_echo_requires_credentials: true,
+    live_echo_absence_must_be_recorded: true,
+    evidence_retained_after_upload: true,
     result_content_expected: false,
   });
 
@@ -232,18 +236,87 @@ export function validateExport(root = repositoryRoot) {
     assert.equal((publishWorkflow.match(new RegExp(`python-version: "${version.replace(".", "\\.")}"`, "g")) ?? []).length, 1, `publish workflow CPython ${version} drifted`);
     for (const kind of ["wheel", "sdist"]) {
       assert.match(publishWorkflow, new RegExp(`--artifact-kind ${kind}[^\\n]+-${version.replace(".", "\\.")}-${kind}`), `post-publish ${version}/${kind} verification drifted`);
+      assert.match(
+        publishWorkflow,
+        new RegExp(`--expected-python ${version.replace(".", "\\.")} --provenance publish[^\\n]+-${version.replace(".", "\\.")}-${kind}`),
+        `post-publish ${version}/${kind} evidence must be bound to the interpreter that produced it`,
+      );
     }
   }
+  // Once the registry holds the bytes, neither the remaining runtimes nor the
+  // evidence upload may be skipped by an earlier verification failure.
+  assert.match(publishWorkflow, /id: upload/, "the upload step must be addressable by the verification guards");
+  assert.equal(
+    (publishWorkflow.match(/if: \$\{\{ !cancelled\(\) && steps\.upload\.outcome == 'success' \}\}/g) ?? []).length,
+    10,
+    "every post-publish runtime, the evidence upload, and the completeness gate must survive an earlier verification failure",
+  );
+  // Within a runtime, the wheel and source-distribution proofs must both run.
+  // The runner executes a `run:` block under errexit, so an intolerant first
+  // call would abandon the second artifact's credential-free record entirely.
+  assert.equal((publishWorkflow.match(/ \|\| status=\$\?$/gm) ?? []).length, 8, "both artifact proofs must run in every post-publish runtime");
+  assert.equal((publishWorkflow.match(/^\s+exit "\$status"$/gm) ?? []).length, 4, "every post-publish runtime must still propagate its failure");
+  assert.match(publishWorkflow, /check-retained-evidence\.py --provenance publish --evidence-dir evidence/, "post-publish evidence completeness gate missing");
+  assert.ok(
+    publishWorkflow.indexOf("upload-artifact@") < publishWorkflow.indexOf("check-retained-evidence.py"),
+    "evidence must be retained before its completeness is asserted",
+  );
   const verifier = readFileSync(resolve(root, "scripts/verify-published-release.py"), "utf8");
   assert.match(verifier, /files\.pythonhosted\.org/, "registry artifact host guard missing");
   assert.match(verifier, /reviewed_export_sha/, "reviewed export SHA evidence missing");
   assert.match(verifier, /authorization_sha256/, "authorization evidence missing");
   assert.match(verifier, /live-echo\.py/, "installed live Echo verification missing");
   assert.doesNotMatch(verifier, /--no-deps/, "post-publish install must include the resolved dependency graph");
+  assert.match(verifier, /smoke-installed\.py/, "credential-free installed-surface smoke missing");
+  assert.match(verifier, /credentials_absent/, "an unconfigured live Echo must be recorded, never assumed");
+  assert.match(verifier, /not_run/, "a live Echo that did not happen must be recorded as not run");
+  assert.match(verifier, /--provenance/, "publish and re-verification evidence must be distinguishable");
+  const completeness = readFileSync(resolve(root, "scripts/check-retained-evidence.py"), "utf8");
+  assert.match(completeness, /no retained proof/, "an absent evidence record must be reported");
+  assert.match(completeness, /does not match the attested candidate/, "recorded registry hashes must be re-checked against the candidate");
+  assert.match(completeness, /credential_free_proof/, "the completeness gate must require the credential-free proof");
+  assert.match(completeness, /live Echo recorded as not run without a reason/, "an unexplained absent live Echo must be reported");
   const liveEcho = readFileSync(resolve(root, "scripts/live-echo.py"), "utf8");
   assert.match(liveEcho, /getExecutionsByExecutionId/, "Echo terminal polling missing");
   assert.match(liveEcho, /getReceiptsByExecutionId/, "Echo receipt retrieval missing");
   assert.doesNotMatch(liveEcho, /getExecutionsByExecutionIdResult/, "Echo must not request result content");
+  // The re-verification workflow re-proves everything that needs no credential.
+  // It must never gain the ability to publish or to reach the live API.
+  const verifyWorkflow = readFileSync(resolve(root, ".github/workflows/verify-release.yml"), "utf8");
+  for (const match of verifyWorkflow.matchAll(/uses:\s*([^\s#]+)/g)) {
+    const reference = match[1].split("@")[1] ?? "";
+    assert.match(reference, fullShaPattern, `action must be pinned to a full SHA: ${match[1]}`);
+  }
+  assert.match(verifyWorkflow, /workflow_dispatch:/);
+  assert.match(verifyWorkflow, /permissions:\n\s+contents: read\n/, "re-verification must hold read-only permission");
+  assert.doesNotMatch(verifyWorkflow, /secrets\.|vars\./, "re-verification must stay credential-free");
+  assert.doesNotMatch(verifyWorkflow, /id-token/, "re-verification must not request a publishing identity");
+  assert.doesNotMatch(verifyWorkflow, /environment:/, "re-verification must not enter the protected publishing environment");
+  assert.doesNotMatch(verifyWorkflow, /gh-action-pypi-publish/, "re-verification must not publish");
+  assert.doesNotMatch(verifyWorkflow, /(?:python\s+-m\s+build|pip\s+wheel|\bbuild\s+--)/i, "re-verification must not rebuild");
+  assert.equal((verifyWorkflow.match(/uses: actions\/setup-python@/g) ?? []).length, 4, "re-verification must cover exactly four CPython runtimes");
+  assert.equal(
+    (verifyWorkflow.match(/if: \$\{\{ !cancelled\(\) \}\}/g) ?? []).length,
+    10,
+    "every re-verification runtime, the evidence upload, and the completeness gate must survive an earlier runtime failure",
+  );
+  assert.equal((verifyWorkflow.match(/ \|\| status=\$\?$/gm) ?? []).length, 8, "both artifact proofs must run in every re-verification runtime");
+  assert.equal((verifyWorkflow.match(/^\s+exit "\$status"$/gm) ?? []).length, 4, "every re-verification runtime must still propagate its failure");
+  assert.match(verifyWorkflow, /check-retained-evidence\.py --provenance reverification --evidence-dir evidence/, "re-verification evidence completeness gate missing");
+  assert.ok(
+    verifyWorkflow.indexOf("upload-artifact@") < verifyWorkflow.indexOf("check-retained-evidence.py"),
+    "evidence must be retained before its completeness is asserted",
+  );
+  for (const version of ["3.11", "3.12", "3.13", "3.14"]) {
+    assert.equal((verifyWorkflow.match(new RegExp(`python-version: "${version.replace(".", "\\.")}"`, "g")) ?? []).length, 1, `re-verification CPython ${version} drifted`);
+    for (const kind of ["wheel", "sdist"]) {
+      assert.match(
+        verifyWorkflow,
+        new RegExp(`--artifact-kind ${kind} --expected-python ${version.replace(".", "\\.")} --provenance reverification[^\\n]+-${version.replace(".", "\\.")}-${kind}`),
+        `re-verification ${version}/${kind} drifted`,
+      );
+    }
+  }
   return { manifest, files: actualPaths.length };
 }
 

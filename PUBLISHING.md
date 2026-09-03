@@ -40,8 +40,25 @@ or reviewed public export commit is pending.
 The workflow refuses a version that already exists, uses OIDC without a PyPI
 token, uploads only the two hash-bound files already in `dist/`, and performs
 no build. After upload it downloads the registry files, compares their hashes,
-clean-installs the wheel and source distribution on CPython 3.11–3.14, and
-records synchronous and asynchronous Echo receipts.
+and clean-installs the wheel and source distribution on CPython 3.11–3.14,
+exercising the installed public surface without a socket. None of that needs a
+credential, so all of it runs: both artifacts within every runtime, and every
+runtime, even when an earlier one fails. The evidence is uploaded before a
+final step asserts the retained set is complete, bound to the runtime and
+artifact that produced each record, and consistent with the attested hashes.
+
+The synchronous and asynchronous Echo receipts are the one post-publish proof
+that does need credentials: an API key secret and a base URL variable on this
+repository. They are recorded only when both are configured. When either is
+absent the evidence records the live Echo as not run, with that reason and the
+names of the absent settings, so an unconfigured runner can never read as a
+live proof that did not happen. A live Echo that runs and fails still fails
+the workflow, after its evidence is written.
+
+`.github/workflows/verify-release.yml` re-proves the credential-free half on
+demand for a version that is already released. It publishes nothing, holds
+read-only permission, requests no OIDC identity, and never enters the
+protected environment.
 
 If the project name is unavailable, the publisher binding is wrong, the
 environment is absent, a registry response is ambiguous, or any hash differs,
