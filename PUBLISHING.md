@@ -42,8 +42,10 @@ token, uploads only the two hash-bound files already in `dist/`, and performs
 no build. After upload it downloads the registry files, compares their hashes,
 and clean-installs the wheel and source distribution on CPython 3.11–3.14,
 exercising the installed public surface without a socket. None of that needs a
-credential, so all of it runs on every runtime, and the evidence is retained
-even when one runtime fails.
+credential, so all of it runs: both artifacts within every runtime, and every
+runtime, even when an earlier one fails. The evidence is uploaded before a
+final step asserts the retained set is complete, bound to the runtime and
+artifact that produced each record, and consistent with the attested hashes.
 
 The synchronous and asynchronous Echo receipts are the one post-publish proof
 that does need credentials: an API key secret and a base URL variable on this
