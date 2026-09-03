@@ -265,7 +265,36 @@ export function validateExport(root = repositoryRoot) {
   assert.match(liveEcho, /getExecutionsByExecutionId/, "Echo terminal polling missing");
   assert.match(liveEcho, /getReceiptsByExecutionId/, "Echo receipt retrieval missing");
   assert.doesNotMatch(liveEcho, /getExecutionsByExecutionIdResult/, "Echo must not request result content");
-
+  // The re-verification workflow re-proves everything that needs no credential.
+  // It must never gain the ability to publish or to reach the live API.
+  const verifyWorkflow = readFileSync(resolve(root, ".github/workflows/verify-release.yml"), "utf8");
+  for (const match of verifyWorkflow.matchAll(/uses:\s*([^\s#]+)/g)) {
+    const reference = match[1].split("@")[1] ?? "";
+    assert.match(reference, fullShaPattern, `action must be pinned to a full SHA: ${match[1]}`);
+  }
+  assert.match(verifyWorkflow, /workflow_dispatch:/);
+  assert.match(verifyWorkflow, /permissions:\n\s+contents: read\n/, "re-verification must hold read-only permission");
+  assert.doesNotMatch(verifyWorkflow, /secrets\.|vars\./, "re-verification must stay credential-free");
+  assert.doesNotMatch(verifyWorkflow, /id-token/, "re-verification must not request a publishing identity");
+  assert.doesNotMatch(verifyWorkflow, /environment:/, "re-verification must not enter the protected publishing environment");
+  assert.doesNotMatch(verifyWorkflow, /gh-action-pypi-publish/, "re-verification must not publish");
+  assert.doesNotMatch(verifyWorkflow, /(?:python\s+-m\s+build|pip\s+wheel|\bbuild\s+--)/i, "re-verification must not rebuild");
+  assert.equal((verifyWorkflow.match(/uses: actions\/setup-python@/g) ?? []).length, 4, "re-verification must cover exactly four CPython runtimes");
+  assert.equal(
+    (verifyWorkflow.match(/if: \$\{\{ !cancelled\(\) \}\}/g) ?? []).length,
+    9,
+    "every re-verification runtime and the evidence upload must survive an earlier runtime failure",
+  );
+  for (const version of ["3.11", "3.12", "3.13", "3.14"]) {
+    assert.equal((verifyWorkflow.match(new RegExp(`python-version: "${version.replace(".", "\\.")}"`, "g")) ?? []).length, 1, `re-verification CPython ${version} drifted`);
+    for (const kind of ["wheel", "sdist"]) {
+      assert.match(
+        verifyWorkflow,
+        new RegExp(`--artifact-kind ${kind} --expected-python ${version.replace(".", "\\.")} --provenance reverification[^\\n]+-${version.replace(".", "\\.")}-${kind}`),
+        `re-verification ${version}/${kind} drifted`,
+      );
+    }
+  }
   return { manifest, files: actualPaths.length };
 }
 

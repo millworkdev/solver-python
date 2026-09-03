@@ -93,6 +93,11 @@
       "size_bytes": 6985
     },
     {
+      "path": ".github/workflows/verify-release.yml",
+      "sha256": "933eea227ca0886470d418b8bbae5500b6acf101d93907cce9403f41d4c650b4",
+      "size_bytes": 4491
+    },
+    {
       "path": "dist/millwork_solver-0.1.0-py3-none-any.whl",
       "sha256": "e177ec7ca91edcb7f1db5f87ccfdae6d4eb3b17d0d7c3047015ad2af694bd3a7",
       "size_bytes": 68530
@@ -129,8 +134,8 @@
     },
     {
       "path": "scripts/check-export.mjs",
-      "sha256": "acb82a1b7e24b36babb85b091c599e1845520758bab82d2575f36015bc2e69cf",
-      "size_bytes": 14006
+      "sha256": "bfb39d774f96d8a52f76397b3191606365ec6a06312b8c0f84218bf46e10cef8",
+      "size_bytes": 16145
     },
     {
       "path": "scripts/check-publish-preconditions.mjs",
