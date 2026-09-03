@@ -241,7 +241,15 @@ negative("an expired authorization is refused", /authorization expiry is not in 
   environment.AUTHORIZATION_EXPIRES_AT = "2026-01-01T01:00:00Z";
 });
 test("pending signed-private-source evidence keeps the publish guard closed", () => {
-  const pending = readFileSync(resolve(repositoryRoot, "publish-binding.json"));
+  // Built inline rather than read from the committed publish-binding.json: once the
+  // operator's signed private-source evidence lands, that file is legitimately
+  // ready_for_operator_dispatch, and reading it here would assert the opposite of
+  // the state the repository is supposed to reach before a dispatch.
+  const pendingBinding = structuredClone(readyBinding);
+  pendingBinding.status = "operator_evidence_required";
+  pendingBinding.reviewed_public_export_sha = null;
+  pendingBinding.private_source_assurance = { assurance_id: null, assurance_sha256: null };
+  const pending = Buffer.from(`${JSON.stringify(pendingBinding, null, 2)}\n`);
   const result = run({ binding: pending });
   assert.notEqual(result.status, 0, "DRIFT_NOT_DETECTED: pending private-source bridge authorized publication");
   assert.match(`${result.stdout}${result.stderr}`, /signed private source and reviewed export evidence are required/);

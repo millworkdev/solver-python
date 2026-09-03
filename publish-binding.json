@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "binding_id": "millworkdev.solver-python.private-source-bridge.v1",
-  "status": "operator_evidence_required",
-  "reviewed_public_export_sha": null,
+  "status": "ready_for_operator_dispatch",
+  "reviewed_public_export_sha": "8a4f20caa448f8d0048c52877f3d9c63a125444e",
   "private_source_assurance": {
-    "assurance_id": null,
-    "assurance_sha256": null
+    "assurance_id": "millwork-solver-0.1.0-source-assurance-414056ce2234d08f",
+    "assurance_sha256": "414056ce2234d08ff1dcd4c03c7475c73a3fea17383a260f810aee1828798581"
   },
   "artifacts": [
     {
