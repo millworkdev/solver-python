@@ -105,8 +105,8 @@
     },
     {
       "path": "publish-binding.json",
-      "sha256": "ff6057c80d5995b91c44551b8e7049dbf2243b7a2052bd21557b9a2bf0706a46",
-      "size_bytes": 780
+      "sha256": "c2327771c9ae80de62e2ea6e609e59c9112c58c98dfe7c3a2f7d8a9263838402",
+      "size_bytes": 934
     },
     {
       "path": "PUBLISHING.md",
@@ -150,8 +150,8 @@
     },
     {
       "path": "scripts/test-publish-preconditions.mjs",
-      "sha256": "a7795d215221fa3004911258e62b422398512eb91b1e1345f6c6a12b2cf02b16",
-      "size_bytes": 12853
+      "sha256": "8ec23e6e584ba4ad8ce2248f2ec2b853aef6d4f6ef8ae790e4d7d8bde1f68538",
+      "size_bytes": 13425
     },
     {
       "path": "scripts/verify-published-release.py",
