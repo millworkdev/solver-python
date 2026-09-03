@@ -84,8 +84,8 @@
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "370df9cfa960ba9d88eaf0687b0154b100a4829eb78dd7af852c8b93e0e3b5bd",
-      "size_bytes": 3141
+      "sha256": "892ae678248714f6b6158d27784adf555ed34128d96b456bfe8b95170a822a67",
+      "size_bytes": 3287
     },
     {
       "path": ".github/workflows/publish.yml",
@@ -159,13 +159,18 @@
     },
     {
       "path": "scripts/test-export.mjs",
-      "sha256": "fe9bae6dc32c29f1a306cd492cecb865f59e7ff7fbc602c238b37e0279f4db29",
-      "size_bytes": 10587
+      "sha256": "f0f5b33be6b1af3de4d5dd2cb6ac0484d18693c8904286ea73c9439d384dc2d1",
+      "size_bytes": 11818
     },
     {
       "path": "scripts/test-publish-preconditions.mjs",
       "sha256": "8ec23e6e584ba4ad8ce2248f2ec2b853aef6d4f6ef8ae790e4d7d8bde1f68538",
       "size_bytes": 13425
+    },
+    {
+      "path": "scripts/test-verification-failure-path.mjs",
+      "sha256": "30fbd9784de6fb0778fd32641fde302bafb3985eec7e3e678cae64eb3ce75c5f",
+      "size_bytes": 8268
     },
     {
       "path": "scripts/verify-published-release.py",

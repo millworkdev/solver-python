@@ -233,3 +233,24 @@ negative("giving re-verification the publishing environment fails even when repi
   writeFileSync(absolute, text.replace(anchor, `${anchor}    environment: pypi-publish\n`));
   repin(root, path);
 });
+
+negative("coupling both artifact proofs to the first one fails even when repinned", /both artifact proofs must run in every post-publish runtime/, (root) => {
+  const path = ".github/workflows/publish.yml";
+  const absolute = resolve(root, path);
+  const text = readFileSync(absolute, "utf8");
+  assert.ok(text.includes(" || status=$?"), "fixture no longer tolerates a first-artifact failure");
+  writeFileSync(absolute, text.replace(" || status=$?", ""));
+  repin(root, path);
+});
+
+negative("dropping the evidence completeness gate fails even when repinned", /post-publish evidence completeness gate missing/, (root) => {
+  const path = ".github/workflows/publish.yml";
+  const absolute = resolve(root, path);
+  const text = readFileSync(absolute, "utf8");
+  // Neutering the gate while leaving its guarded step in place is the drift the
+  // step-count assertion cannot see, so this is the case that must be caught.
+  const gate = "        run: python scripts/check-retained-evidence.py --provenance publish --evidence-dir evidence\n";
+  assert.ok(text.includes(gate), "fixture no longer contains the evidence completeness gate");
+  writeFileSync(absolute, text.replace(gate, "        run: 'true'\n"));
+  repin(root, path);
+});
