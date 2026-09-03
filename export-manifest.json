@@ -64,8 +64,12 @@
       "3.13",
       "3.14"
     ],
+    "installed_surface_smoke_required": true,
     "sync_echo_required": true,
     "async_echo_required": true,
+    "live_echo_requires_credentials": true,
+    "live_echo_absence_must_be_recorded": true,
+    "evidence_retained_after_upload": true,
     "result_content_expected": false
   },
   "publication": {
@@ -85,8 +89,8 @@
     },
     {
       "path": ".github/workflows/publish.yml",
-      "sha256": "20ddf9a3310fb2cb6e4b24bd9ea1911c083ae20aa8b8c859dc31064adfea5dee",
-      "size_bytes": 5993
+      "sha256": "091bfed38d36c478d936bffa904382623ff4f5b1e43828670c2778b9473ea3e4",
+      "size_bytes": 6985
     },
     {
       "path": "dist/millwork_solver-0.1.0-py3-none-any.whl",
@@ -125,8 +129,8 @@
     },
     {
       "path": "scripts/check-export.mjs",
-      "sha256": "f9799d7b96d48c5edb565457afedb6bdd1ad24102ec2fa43e6ff055df330b648",
-      "size_bytes": 12610
+      "sha256": "acb82a1b7e24b36babb85b091c599e1845520758bab82d2575f36015bc2e69cf",
+      "size_bytes": 14006
     },
     {
       "path": "scripts/check-publish-preconditions.mjs",
@@ -155,8 +159,8 @@
     },
     {
       "path": "scripts/verify-published-release.py",
-      "sha256": "c20b5349172f719a87df7c1faec2c95a7126fff4c7e6b550844c6f8e7bc47246",
-      "size_bytes": 4634
+      "sha256": "55e2dae8643c657d097534f67a3f2b9219956269080f89341d17bb8959e0cee0",
+      "size_bytes": 7913
     }
   ]
 }

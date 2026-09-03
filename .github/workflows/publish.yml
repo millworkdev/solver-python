@@ -70,6 +70,7 @@ jobs:
         run: node scripts/check-publish-preconditions.mjs
 
       - name: Upload the retained wheel and sdist through OIDC
+        id: upload
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: dist/
@@ -78,54 +79,63 @@ jobs:
           print-hash: true
 
       - name: Set up CPython 3.11
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.11"
       - name: Verify registry bytes and both installed artifacts on CPython 3.11
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         env:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-wheel" --out evidence/python-3.11-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-sdist" --out evidence/python-3.11-sdist.json
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.11 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-wheel" --out evidence/python-3.11-wheel.json
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.11 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-sdist" --out evidence/python-3.11-sdist.json
 
       - name: Set up CPython 3.12
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
       - name: Verify registry bytes and both installed artifacts on CPython 3.12
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         env:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-wheel" --out evidence/python-3.12-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-sdist" --out evidence/python-3.12-sdist.json
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.12 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-wheel" --out evidence/python-3.12-wheel.json
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.12 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-sdist" --out evidence/python-3.12-sdist.json
 
       - name: Set up CPython 3.13
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.13"
       - name: Verify registry bytes and both installed artifacts on CPython 3.13
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         env:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-wheel" --out evidence/python-3.13-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-sdist" --out evidence/python-3.13-sdist.json
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.13 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-wheel" --out evidence/python-3.13-wheel.json
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.13 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-sdist" --out evidence/python-3.13-sdist.json
 
       - name: Set up CPython 3.14
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.14"
       - name: Verify registry bytes and both installed artifacts on CPython 3.14
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         env:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-wheel" --out evidence/python-3.14-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-sdist" --out evidence/python-3.14-sdist.json
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.14 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-wheel" --out evidence/python-3.14-wheel.json
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.14 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-sdist" --out evidence/python-3.14-sdist.json
 
       - name: Retain exact post-publish verification evidence
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: python-pypi-0.1.0-verification
