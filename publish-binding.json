@@ -4,8 +4,8 @@
   "status": "ready_for_operator_dispatch",
   "reviewed_public_export_sha": "8a4f20caa448f8d0048c52877f3d9c63a125444e",
   "private_source_assurance": {
-    "assurance_id": "millwork-solver-0.1.0-source-assurance-414056ce2234d08f",
-    "assurance_sha256": "414056ce2234d08ff1dcd4c03c7475c73a3fea17383a260f810aee1828798581"
+    "assurance_id": "millwork-solver-0.1.0-source-assurance-0771967a974156ac",
+    "assurance_sha256": "0771967a974156aca022bac1b3f3377653e86921e41d754b0499383703800e71"
   },
   "artifacts": [
     {
