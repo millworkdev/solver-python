@@ -248,14 +248,19 @@ export function validateExport(root = repositoryRoot) {
   assert.match(publishWorkflow, /id: upload/, "the upload step must be addressable by the verification guards");
   assert.equal(
     (publishWorkflow.match(/if: \$\{\{ !cancelled\(\) && steps\.upload\.outcome == 'success' \}\}/g) ?? []).length,
-    9,
-    "every post-publish runtime and the evidence upload must survive an earlier verification failure",
+    10,
+    "every post-publish runtime, the evidence upload, and the completeness gate must survive an earlier verification failure",
   );
   // Within a runtime, the wheel and source-distribution proofs must both run.
   // The runner executes a `run:` block under errexit, so an intolerant first
   // call would abandon the second artifact's credential-free record entirely.
   assert.equal((publishWorkflow.match(/ \|\| status=\$\?$/gm) ?? []).length, 8, "both artifact proofs must run in every post-publish runtime");
   assert.equal((publishWorkflow.match(/^\s+exit "\$status"$/gm) ?? []).length, 4, "every post-publish runtime must still propagate its failure");
+  assert.match(publishWorkflow, /check-retained-evidence\.py --provenance publish --evidence-dir evidence/, "post-publish evidence completeness gate missing");
+  assert.ok(
+    publishWorkflow.indexOf("upload-artifact@") < publishWorkflow.indexOf("check-retained-evidence.py"),
+    "evidence must be retained before its completeness is asserted",
+  );
   const verifier = readFileSync(resolve(root, "scripts/verify-published-release.py"), "utf8");
   assert.match(verifier, /files\.pythonhosted\.org/, "registry artifact host guard missing");
   assert.match(verifier, /reviewed_export_sha/, "reviewed export SHA evidence missing");
@@ -266,6 +271,11 @@ export function validateExport(root = repositoryRoot) {
   assert.match(verifier, /credentials_absent/, "an unconfigured live Echo must be recorded, never assumed");
   assert.match(verifier, /not_run/, "a live Echo that did not happen must be recorded as not run");
   assert.match(verifier, /--provenance/, "publish and re-verification evidence must be distinguishable");
+  const completeness = readFileSync(resolve(root, "scripts/check-retained-evidence.py"), "utf8");
+  assert.match(completeness, /no retained proof/, "an absent evidence record must be reported");
+  assert.match(completeness, /does not match the attested candidate/, "recorded registry hashes must be re-checked against the candidate");
+  assert.match(completeness, /credential_free_proof/, "the completeness gate must require the credential-free proof");
+  assert.match(completeness, /live Echo recorded as not run without a reason/, "an unexplained absent live Echo must be reported");
   const liveEcho = readFileSync(resolve(root, "scripts/live-echo.py"), "utf8");
   assert.match(liveEcho, /getExecutionsByExecutionId/, "Echo terminal polling missing");
   assert.match(liveEcho, /getReceiptsByExecutionId/, "Echo receipt retrieval missing");
@@ -287,11 +297,16 @@ export function validateExport(root = repositoryRoot) {
   assert.equal((verifyWorkflow.match(/uses: actions\/setup-python@/g) ?? []).length, 4, "re-verification must cover exactly four CPython runtimes");
   assert.equal(
     (verifyWorkflow.match(/if: \$\{\{ !cancelled\(\) \}\}/g) ?? []).length,
-    9,
-    "every re-verification runtime and the evidence upload must survive an earlier runtime failure",
+    10,
+    "every re-verification runtime, the evidence upload, and the completeness gate must survive an earlier runtime failure",
   );
   assert.equal((verifyWorkflow.match(/ \|\| status=\$\?$/gm) ?? []).length, 8, "both artifact proofs must run in every re-verification runtime");
   assert.equal((verifyWorkflow.match(/^\s+exit "\$status"$/gm) ?? []).length, 4, "every re-verification runtime must still propagate its failure");
+  assert.match(verifyWorkflow, /check-retained-evidence\.py --provenance reverification --evidence-dir evidence/, "re-verification evidence completeness gate missing");
+  assert.ok(
+    verifyWorkflow.indexOf("upload-artifact@") < verifyWorkflow.indexOf("check-retained-evidence.py"),
+    "evidence must be retained before its completeness is asserted",
+  );
   for (const version of ["3.11", "3.12", "3.13", "3.14"]) {
     assert.equal((verifyWorkflow.match(new RegExp(`python-version: "${version.replace(".", "\\.")}"`, "g")) ?? []).length, 1, `re-verification CPython ${version} drifted`);
     for (const kind of ["wheel", "sdist"]) {

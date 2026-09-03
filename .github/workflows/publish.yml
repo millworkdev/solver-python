@@ -166,3 +166,7 @@ jobs:
           path: evidence/
           retention-days: 90
           if-no-files-found: error
+
+      - name: Assert the retained evidence is complete
+        if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
+        run: python scripts/check-retained-evidence.py --provenance publish --evidence-dir evidence

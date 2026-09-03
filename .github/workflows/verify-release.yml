@@ -106,3 +106,7 @@ jobs:
           path: evidence/
           retention-days: 90
           if-no-files-found: error
+
+      - name: Assert the retained evidence is complete
+        if: ${{ !cancelled() }}
+        run: python scripts/check-retained-evidence.py --provenance reverification --evidence-dir evidence
