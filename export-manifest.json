@@ -154,8 +154,8 @@
     },
     {
       "path": "scripts/test-export.mjs",
-      "sha256": "1d6a594247f418163bdaaa2bafc1de8ef97aac9cd4da1395219e2365ab09ecf8",
-      "size_bytes": 7681
+      "sha256": "fe9bae6dc32c29f1a306cd492cecb865f59e7ff7fbc602c238b37e0279f4db29",
+      "size_bytes": 10587
     },
     {
       "path": "scripts/test-publish-preconditions.mjs",
