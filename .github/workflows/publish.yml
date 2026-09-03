@@ -89,8 +89,14 @@ jobs:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.11 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-wheel" --out evidence/python-3.11-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.11 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-sdist" --out evidence/python-3.11-sdist.json
+          set -euo pipefail
+          # Both artifact proofs run even when the first one fails, so a
+          # failing live Echo can never cost this runtime its second
+          # credential-free record. The step still fails, afterwards.
+          status=0
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.11 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-wheel" --out evidence/python-3.11-wheel.json || status=$?
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.11 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.11-sdist" --out evidence/python-3.11-sdist.json || status=$?
+          exit "$status"
 
       - name: Set up CPython 3.12
         if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
@@ -103,8 +109,14 @@ jobs:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.12 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-wheel" --out evidence/python-3.12-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.12 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-sdist" --out evidence/python-3.12-sdist.json
+          set -euo pipefail
+          # Both artifact proofs run even when the first one fails, so a
+          # failing live Echo can never cost this runtime its second
+          # credential-free record. The step still fails, afterwards.
+          status=0
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.12 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-wheel" --out evidence/python-3.12-wheel.json || status=$?
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.12 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.12-sdist" --out evidence/python-3.12-sdist.json || status=$?
+          exit "$status"
 
       - name: Set up CPython 3.13
         if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
@@ -117,8 +129,14 @@ jobs:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.13 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-wheel" --out evidence/python-3.13-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.13 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-sdist" --out evidence/python-3.13-sdist.json
+          set -euo pipefail
+          # Both artifact proofs run even when the first one fails, so a
+          # failing live Echo can never cost this runtime its second
+          # credential-free record. The step still fails, afterwards.
+          status=0
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.13 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-wheel" --out evidence/python-3.13-wheel.json || status=$?
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.13 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.13-sdist" --out evidence/python-3.13-sdist.json || status=$?
+          exit "$status"
 
       - name: Set up CPython 3.14
         if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
@@ -131,8 +149,14 @@ jobs:
           SOLVERAPI_API_KEY: ${{ secrets.SOLVERAPI_API_KEY }}
           SOLVERAPI_BASE_URL: ${{ vars.SOLVERAPI_BASE_URL }}
         run: |
-          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.14 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-wheel" --out evidence/python-3.14-wheel.json
-          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.14 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-sdist" --out evidence/python-3.14-sdist.json
+          set -euo pipefail
+          # Both artifact proofs run even when the first one fails, so a
+          # failing live Echo can never cost this runtime its second
+          # credential-free record. The step still fails, afterwards.
+          status=0
+          python scripts/verify-published-release.py --artifact-kind wheel --expected-python 3.14 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-wheel" --out evidence/python-3.14-wheel.json || status=$?
+          python scripts/verify-published-release.py --artifact-kind sdist --expected-python 3.14 --provenance publish --evidence-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-3.14-sdist" --out evidence/python-3.14-sdist.json || status=$?
+          exit "$status"
 
       - name: Retain exact post-publish verification evidence
         if: ${{ !cancelled() && steps.upload.outcome == 'success' }}

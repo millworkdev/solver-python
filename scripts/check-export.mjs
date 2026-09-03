@@ -251,6 +251,11 @@ export function validateExport(root = repositoryRoot) {
     9,
     "every post-publish runtime and the evidence upload must survive an earlier verification failure",
   );
+  // Within a runtime, the wheel and source-distribution proofs must both run.
+  // The runner executes a `run:` block under errexit, so an intolerant first
+  // call would abandon the second artifact's credential-free record entirely.
+  assert.equal((publishWorkflow.match(/ \|\| status=\$\?$/gm) ?? []).length, 8, "both artifact proofs must run in every post-publish runtime");
+  assert.equal((publishWorkflow.match(/^\s+exit "\$status"$/gm) ?? []).length, 4, "every post-publish runtime must still propagate its failure");
   const verifier = readFileSync(resolve(root, "scripts/verify-published-release.py"), "utf8");
   assert.match(verifier, /files\.pythonhosted\.org/, "registry artifact host guard missing");
   assert.match(verifier, /reviewed_export_sha/, "reviewed export SHA evidence missing");
@@ -285,6 +290,8 @@ export function validateExport(root = repositoryRoot) {
     9,
     "every re-verification runtime and the evidence upload must survive an earlier runtime failure",
   );
+  assert.equal((verifyWorkflow.match(/ \|\| status=\$\?$/gm) ?? []).length, 8, "both artifact proofs must run in every re-verification runtime");
+  assert.equal((verifyWorkflow.match(/^\s+exit "\$status"$/gm) ?? []).length, 4, "every re-verification runtime must still propagate its failure");
   for (const version of ["3.11", "3.12", "3.13", "3.14"]) {
     assert.equal((verifyWorkflow.match(new RegExp(`python-version: "${version.replace(".", "\\.")}"`, "g")) ?? []).length, 1, `re-verification CPython ${version} drifted`);
     for (const kind of ["wheel", "sdist"]) {

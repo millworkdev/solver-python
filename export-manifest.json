@@ -89,13 +89,13 @@
     },
     {
       "path": ".github/workflows/publish.yml",
-      "sha256": "091bfed38d36c478d936bffa904382623ff4f5b1e43828670c2778b9473ea3e4",
-      "size_bytes": 6985
+      "sha256": "0c5464b1da0d342dd66aa2e21b9679e65993ff84e4c453332df6b4c4589c7f88",
+      "size_bytes": 8225
     },
     {
       "path": ".github/workflows/verify-release.yml",
-      "sha256": "933eea227ca0886470d418b8bbae5500b6acf101d93907cce9403f41d4c650b4",
-      "size_bytes": 4491
+      "sha256": "311ae82828aff1d9abd4d755c548fed286b452f2e3791eff45aa6ce6f2af372e",
+      "size_bytes": 5731
     },
     {
       "path": "dist/millwork_solver-0.1.0-py3-none-any.whl",
@@ -134,8 +134,8 @@
     },
     {
       "path": "scripts/check-export.mjs",
-      "sha256": "bfb39d774f96d8a52f76397b3191606365ec6a06312b8c0f84218bf46e10cef8",
-      "size_bytes": 16145
+      "sha256": "65582e092f096dd2fc1c44aedea048f84b974205749bdb2ced4d50f5500826e9",
+      "size_bytes": 16965
     },
     {
       "path": "scripts/check-publish-preconditions.mjs",
