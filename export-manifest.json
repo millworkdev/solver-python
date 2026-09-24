@@ -114,8 +114,8 @@
     },
     {
       "path": "publish-binding.json",
-      "sha256": "b7aef615c2005fd42e082d6cf1f54979605b82b5afa05b9e269de7be19368982",
-      "size_bytes": 802
+      "sha256": "4b623174a5d021e85ccbf4b178b94cd123800a5e02e3df40f275b59095c98c8a",
+      "size_bytes": 956
     },
     {
       "path": "PUBLISHING.md",
