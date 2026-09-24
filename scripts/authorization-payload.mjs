@@ -4,7 +4,6 @@ import { createHash } from "node:crypto";
 const exactRepository = "millworkdev/solver-python";
 const exactWorkflowRef = `${exactRepository}/.github/workflows/publish.yml@refs/heads/main`;
 const exactProject = "millwork-solver";
-const exactVersion = "0.1.0";
 const exactSchema = "millworkdev.solver-python.bounded-publish-authorization.v1";
 const exactActions = ["publish_retained_artifacts", "verify_published_artifacts"];
 const exactOperator = "matt783";
@@ -45,8 +44,16 @@ export function authorizationDigest(payload) {
 }
 
 export function validateReleaseBinding(binding, exactArtifacts, { requireReady = true } = {}) {
-  exactKeys(binding, ["artifacts", "binding_id", "private_source_assurance", "publication", "reviewed_public_export_sha", "schema_version", "status"], "private-source bridge");
+  exactKeys(binding, ["artifacts", "binding_id", "private_source_assurance", "publication", "reviewed_public_export_sha", "schema_version", "status", "version"], "private-source bridge");
   assert.equal(binding.schema_version, 1);
+  // The version being authorized comes from the retained binding. A constant
+  // here would be a second copy of the same fact, and the copy that goes
+  // stale is the one that refuses the release it was meant to authorize.
+  assert.match(binding.version ?? "", /^\d+\.\d+\.\d+$/, "the retained binding must declare a stable release version");
+  for (const artifact of binding.artifacts ?? []) {
+    assert.ok(String(artifact.filename).includes(binding.version),
+      `retained artifact ${artifact.filename} does not carry the binding version ${binding.version}`);
+  }
   assert.equal(binding.binding_id, "millworkdev.solver-python.private-source-bridge.v1");
   assert.deepEqual(binding.artifacts, exactArtifacts, "private-source bridge artifact binding drifted");
   assert.deepEqual(binding.publication, { published: false, external_mutation_performed: false }, "private-source bridge must precede publication");
@@ -58,11 +65,14 @@ export function validateReleaseBinding(binding, exactArtifacts, { requireReady =
   }
   assert.equal(binding.status, "ready_for_operator_dispatch", "signed private source and reviewed export evidence are required");
   assert.match(binding.reviewed_public_export_sha ?? "", fullSha, "reviewed public export SHA must be full");
-  assert.match(binding.private_source_assurance.assurance_id ?? "", /^millwork-solver-0\.1\.0-source-assurance-[0-9a-f]{16}$/, "private source assurance ID drifted");
+  const assurancePrefix = `millwork-solver-${binding.version}-source-assurance-`;
+  assert.match(binding.private_source_assurance.assurance_id ?? "",
+    new RegExp(`^millwork-solver-${binding.version.replace(/\./g, "\\.")}-source-assurance-[0-9a-f]{16}$`),
+    "private source assurance ID drifted");
   assert.match(binding.private_source_assurance.assurance_sha256 ?? "", sha256, "private source assurance digest must be SHA-256");
   assert.equal(
     binding.private_source_assurance.assurance_id,
-    `millwork-solver-0.1.0-source-assurance-${binding.private_source_assurance.assurance_sha256.slice(0, 16)}`,
+    `${assurancePrefix}${binding.private_source_assurance.assurance_sha256.slice(0, 16)}`,
     "private source assurance ID/digest relation drifted",
   );
 }
@@ -76,6 +86,8 @@ export function buildAuthorizationPayload({ environment, manifest, manifestBytes
   assert.equal(manifest.workflow_binding.authorization_max_lifetime_seconds, 86400, "authorization lifetime policy drifted");
   assert.deepEqual(manifest.workflow_binding.authorization_actions, exactActions, "authorization actions drifted");
   validateReleaseBinding(binding, manifest.artifacts);
+  assert.equal(manifest.identity.version, binding.version,
+    "export manifest and retained binding disagree on the version being published");
   return {
     schema_id: exactSchema,
     authorized_by: environment.AUTHORIZATION_ACTOR,
@@ -88,7 +100,7 @@ export function buildAuthorizationPayload({ environment, manifest, manifestBytes
       workflow_ref: exactWorkflowRef,
       environment: "pypi-publish",
       project: exactProject,
-      version: exactVersion,
+      version: binding.version,
       execution_sha: environment.EXPECTED_EXPORT_SHA,
       reviewed_public_export_sha: binding.reviewed_public_export_sha,
       export_manifest_sha256: digest(manifestBytes),

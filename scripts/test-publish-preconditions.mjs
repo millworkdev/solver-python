@@ -13,11 +13,24 @@ const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const guard = resolve(repositoryRoot, "scripts/check-publish-preconditions.mjs");
 const manifestBytes = readFileSync(resolve(repositoryRoot, "export-manifest.json"));
 const manifest = JSON.parse(manifestBytes);
+// The export manifest under test declares the version being published, so the
+// fixtures follow it. Restating it here would make these tests pass only for
+// the one release they were written against.
+const retainedVersion = manifest.identity.version;
+
+/** A version guaranteed to differ from the one being released. */
+function aDifferentVersion(version) {
+  const parts = version.split(".").map(Number);
+  parts[parts.length - 1] += 1;
+  const other = parts.join(".");
+  if (other === version) throw new Error("failed to derive a different version");
+  return other;
+}
 const now = new Date();
 const issuedAt = new Date(Math.floor((now.getTime() - 60_000) / 1000) * 1000).toISOString().replace(".000Z", "Z");
 const expiresAt = new Date(Math.floor((now.getTime() + 3_600_000) / 1000) * 1000).toISOString().replace(".000Z", "Z");
 const baseEnvironment = {
-  EXPECTED_VERSION: "0.1.0",
+  EXPECTED_VERSION: retainedVersion,
   EXPECTED_EXPORT_SHA: "a".repeat(40),
   GITHUB_SHA: "a".repeat(40),
   GITHUB_ACTOR: "matt783",
@@ -37,9 +50,10 @@ const readyBinding = {
   schema_version: 1,
   binding_id: "millworkdev.solver-python.private-source-bridge.v1",
   status: "ready_for_operator_dispatch",
+  version: retainedVersion,
   reviewed_public_export_sha: "d".repeat(40),
   private_source_assurance: {
-    assurance_id: "millwork-solver-0.1.0-source-assurance-eeeeeeeeeeeeeeee",
+    assurance_id: `millwork-solver-${retainedVersion}-source-assurance-eeeeeeeeeeeeeeee`,
     assurance_sha256: "e".repeat(64),
   },
   artifacts: manifest.artifacts,
@@ -47,7 +61,7 @@ const readyBinding = {
 };
 const readyBindingBytes = Buffer.from(`${JSON.stringify(readyBinding, null, 2)}\n`);
 const absent = {
-  url: "https://pypi.org/pypi/millwork-solver/0.1.0/json",
+  url: `https://pypi.org/pypi/millwork-solver/${retainedVersion}/json`,
   status: 404,
   content_type: "application/json",
   body: JSON.stringify({ message: "Not Found" }),
@@ -142,8 +156,10 @@ test("the canonical payload can be printed before GitHub assigns a comment ref a
   const temporary = mkdtempSync(resolve(tmpdir(), "solver-python-authorization-print-"));
   try {
     const bindingFixture = resolve(temporary, "binding.json");
+    const registryFixture = resolve(temporary, "response.json");
     writeFileSync(bindingFixture, readyBindingBytes);
-    const result = spawnSync(process.execPath, [guard, "--print-authorization-payload", "--release-binding-file", bindingFixture], {
+    writeFileSync(registryFixture, `${JSON.stringify(absent)}\n`);
+    const result = spawnSync(process.execPath, [guard, "--print-authorization-payload", "--release-binding-file", bindingFixture, "--registry-response-file", registryFixture], {
       cwd: repositoryRoot,
       env: { PATH: process.env.PATH, ...environment },
       encoding: "utf8",
@@ -158,18 +174,54 @@ test("the canonical payload can be printed before GitHub assigns a comment ref a
   }
 });
 
+test("an authorization payload cannot even be prepared for a version the registry already shows live -- the duplicate-publish guard is not bypassable via --print-authorization-payload", () => {
+  // publish-binding.json's own publication.published must stay false so a
+  // second dispatch is never silently pre-authorized (authorization-payload.mjs
+  // asserts exactly that); this proves the *live registry* is the independent
+  // check that actually stops a payload from being prepared for an artifact
+  // that is already published, regardless of what that file says.
+  const environment = boundEnvironment();
+  delete environment.AUTHORIZATION_REF;
+  delete environment.AUTHORIZATION_ISSUED_AT;
+  delete environment.AUTHORIZATION_SHA256;
+  const temporary = mkdtempSync(resolve(tmpdir(), "solver-python-authorization-print-live-"));
+  try {
+    const bindingFixture = resolve(temporary, "binding.json");
+    const registryFixture = resolve(temporary, "response.json");
+    writeFileSync(bindingFixture, readyBindingBytes);
+    writeFileSync(registryFixture, `${JSON.stringify({
+      url: `https://pypi.org/pypi/millwork-solver/${retainedVersion}/json`,
+      status: 200,
+      content_type: "application/json",
+      body: JSON.stringify({ info: { version: retainedVersion } }),
+    })}\n`);
+    const result = spawnSync(process.execPath, [guard, "--print-authorization-payload", "--release-binding-file", bindingFixture, "--registry-response-file", registryFixture], {
+      cwd: repositoryRoot,
+      env: { PATH: process.env.PATH, ...environment },
+      encoding: "utf8",
+    });
+    assert.notEqual(result.status, 0, "DRIFT_NOT_DETECTED: a payload was printed for an already-published version");
+    assert.match(`${result.stdout}${result.stderr}`, /not definitively absent/);
+    assert.equal(result.stdout, "", "no payload may be printed once the registry check has failed");
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
 negative("an existing immutable version is refused", /not definitively absent/, undefined, (response) => {
   response.status = 200;
-  response.body = JSON.stringify({ info: { version: "0.1.0" } });
+  response.body = JSON.stringify({ info: { version: retainedVersion } });
 });
 negative("an ambiguous 404 body is refused", /absence response is ambiguous/, undefined, (response) => {
   response.body = JSON.stringify({ message: "cache miss" });
 });
 negative("a registry redirect or lookalike URL is refused", /registry lookup URL drifted/, undefined, (response) => {
-  response.url = "https://pypi.example.invalid/pypi/millwork-solver/0.1.0/json";
+  response.url = `https://pypi.example.invalid/pypi/millwork-solver/${retainedVersion}/json`;
 });
 negative("a wrong version input is refused", /dispatch version does not match/, (environment) => {
-  environment.EXPECTED_VERSION = "0.1.1";
+  // Derived from the retained version so this stays a wrong value at every
+  // release; a literal stops being wrong as soon as it becomes the release.
+  environment.EXPECTED_VERSION = aDifferentVersion(retainedVersion);
 });
 negative("a wrong repository is refused", /repository binding drifted/, (environment) => {
   environment.GITHUB_REPOSITORY = "millworkdev/lookalike";
@@ -256,7 +308,7 @@ test("pending signed-private-source evidence keeps the publish guard closed", ()
 });
 test("a public assurance ID not derived from its digest is refused", () => {
   const binding = structuredClone(readyBinding);
-  binding.private_source_assurance.assurance_id = "millwork-solver-0.1.0-source-assurance-ffffffffffffffff";
+  binding.private_source_assurance.assurance_id = `millwork-solver-${retainedVersion}-source-assurance-ffffffffffffffff`;
   const result = run({ binding: Buffer.from(`${JSON.stringify(binding, null, 2)}\n`) });
   assert.notEqual(result.status, 0, "DRIFT_NOT_DETECTED: unrelated assurance ID was accepted");
   assert.match(`${result.stdout}${result.stderr}`, /private source assurance ID\/digest relation drifted/);

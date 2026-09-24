@@ -10,9 +10,24 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+// The fixtures act on the retained wheel, whose name carries the version, so
+// the name comes from the binding these tests are checking rather than from a
+// literal that only matches one release.
+const retainedWheel = JSON.parse(readFileSync(resolve(repositoryRoot, "publish-binding.json"), "utf8"))
+  .artifacts.find((artifact) => artifact.kind === "wheel").filename;
+const retainedWheelPath = `dist/${retainedWheel}`;
 
 function digest(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+/** A version guaranteed to differ from the one being released. */
+function aDifferentVersion(version) {
+  const parts = version.split(".").map(Number);
+  parts[parts.length - 1] += 1;
+  const other = parts.join(".");
+  if (other === version) throw new Error("failed to derive a different version");
+  return other;
 }
 
 function fixture() {
@@ -67,15 +82,16 @@ test("the staged public export passes its own closed-world check", () => {
   });
 });
 
-negative("wrong wheel bytes fail at the artifact hash boundary", /millwork_solver-0\.1\.0-py3-none-any\.whl hash drifted/, (root) => {
-  const path = resolve(root, "dist/millwork_solver-0.1.0-py3-none-any.whl");
+negative("wrong wheel bytes fail at the artifact hash boundary",
+  new RegExp(`${retainedWheel.replace(/\./g, "\\.")} hash drifted`), (root) => {
+  const path = resolve(root, retainedWheelPath);
   const bytes = readFileSync(path);
   bytes[0] ^= 1;
   writeFileSync(path, bytes);
 });
 
 negative("repinning altered wheel bytes in the manifest cannot replace the retained candidate", /exact retained binding drifted/, (root) => {
-  const artifactPath = "dist/millwork_solver-0.1.0-py3-none-any.whl";
+  const artifactPath = retainedWheelPath;
   const absolute = resolve(root, artifactPath);
   const bytes = readFileSync(absolute);
   bytes[0] ^= 1;
@@ -94,6 +110,32 @@ negative("repinning altered wheel bytes in the manifest cannot replace the retai
 negative("an extra public file fails the closed inventory", /public export inventory drifted/, (root) => {
   writeFileSync(resolve(root, "unreviewed.txt"), "not reviewed\n");
 });
+
+for (const path of ["SECURITY.md", "SUPPORT.md"]) {
+  negative(`${path} cannot be an unhashed support overlay`, /public export inventory drifted/, (root) => {
+    const manifestPath = resolve(root, "export-manifest.json");
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    assert.ok(manifest.files.some((entry) => entry.path === path));
+    manifest.files = manifest.files.filter((entry) => entry.path !== path);
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  });
+  negative(`${path} bytes remain hash-bound`, /(?:size|hash) drifted/, (root) => {
+    writeFileSync(resolve(root, path), `${readFileSync(resolve(root, path), "utf8")}\nchanged\n`);
+  });
+}
+
+negative("a repository-description overlay is not implicitly authorized", /public export inventory drifted/, (root) => {
+  writeFileSync(resolve(root, ".github/repository-description.txt"), "Unreviewed overlay\n");
+});
+
+for (const field of ["installed_surface_smoke_required", "live_echo_requires_credentials", "live_echo_absence_must_be_recorded", "evidence_retained_after_upload"]) {
+  negative(`${field} cannot be omitted from the verification contract`, /verification contract drifted/, (root) => {
+    const manifestPath = resolve(root, "export-manifest.json");
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    delete manifest.verification[field];
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  });
+}
 
 negative("a secret-shaped value fails even when its file hash is repinned", /GitHub token forbidden/, (root) => {
   const path = "README.md";
@@ -182,7 +224,9 @@ negative("a different protected environment fails closed", /workflow binding dri
 negative("a different version fails closed", /identity drifted/, (root) => {
   const path = resolve(root, "export-manifest.json");
   const manifest = JSON.parse(readFileSync(path, "utf8"));
-  manifest.identity.version = "0.1.1";
+  // Derived, not written out: a literal here is only "a different version" for
+  // the one release it was typed against, and becomes a no-op at the next one.
+  manifest.identity.version = aDifferentVersion(manifest.identity.version);
   writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
 });
 

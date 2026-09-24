@@ -23,27 +23,27 @@ const expectedRootKeys = [
   "verification",
   "workflow_binding",
 ];
-const expectedArtifactFiles = [
-  "millwork_solver-0.1.0-py3-none-any.whl",
-  "millwork_solver-0.1.0.tar.gz",
-];
-const expectedRepositorySupportOverlay = [
-  ".github/repository-description.txt",
-  "SECURITY.md",
-  "SUPPORT.md",
-];
-const expectedArtifactBindings = {
-  "millwork_solver-0.1.0-py3-none-any.whl": {
-    kind: "wheel",
-    sha256: "e177ec7ca91edcb7f1db5f87ccfdae6d4eb3b17d0d7c3047015ad2af694bd3a7",
-    size_bytes: 68530,
-  },
-  "millwork_solver-0.1.0.tar.gz": {
-    kind: "sdist",
-    sha256: "bf8652181e49cbb407bf8dc59ce638e49f7ba8e268619df677cd4621021530e7",
-    size_bytes: 15177,
-  },
-};
+// What this release publishes comes from the retained binding that ships in the
+// export beside this script, not from constants here. The manifest under test is
+// generated from the preparation record, so comparing it against the binding is
+// a cross-check between two independently written files -- and it catches a
+// manifest and binding that disagree, which a hardcoded version could not.
+const retainedBinding = JSON.parse(readFileSync(resolve(repositoryRoot, "publish-binding.json"), "utf8"));
+const retainedVersion = retainedBinding.version;
+assert.match(String(retainedVersion), /^\d+\.\d+\.\d+$/, "the retained binding must declare a stable release version");
+assert.equal(Array.isArray(retainedBinding.artifacts) && retainedBinding.artifacts.length === 2, true,
+  "the retained binding must name exactly one wheel and one sdist");
+const expectedArtifactFiles = retainedBinding.artifacts
+  .map((artifact) => artifact.filename)
+  .toSorted((left, right) => left.localeCompare(right));
+const expectedArtifactBindings = Object.fromEntries(retainedBinding.artifacts.map((artifact) => {
+  assert.ok(String(artifact.filename).includes(retainedVersion),
+    `retained artifact ${artifact.filename} does not carry the binding version ${retainedVersion}`);
+  assert.match(String(artifact.sha256), sha256Pattern, `retained artifact ${artifact.filename} sha256 is not a digest`);
+  assert.ok(Number.isInteger(artifact.size_bytes) && artifact.size_bytes > 0,
+    `retained artifact ${artifact.filename} has no positive size`);
+  return [artifact.filename, { kind: artifact.kind, sha256: artifact.sha256, size_bytes: artifact.size_bytes }];
+}));
 const expectedPublicationKeys = [
   "credential_used",
   "environment_configured",
@@ -148,7 +148,7 @@ export function validateExport(root = repositoryRoot) {
   assert.deepEqual(manifest.identity, {
     distribution: "millwork-solver",
     import_package: "millwork_solver",
-    version: "0.1.0",
+    version: retainedVersion,
     license: "Apache-2.0",
     supported_cpython: ["3.11", "3.12", "3.13", "3.14"],
   }, "identity drifted");
@@ -194,7 +194,7 @@ export function validateExport(root = repositoryRoot) {
     live_echo_absence_must_be_recorded: true,
     evidence_retained_after_upload: true,
     result_content_expected: false,
-  });
+  }, "verification contract drifted");
 
   assert.ok(Array.isArray(manifest.files) && manifest.files.length > 0, "manifest files are required");
   const manifestPaths = manifest.files.map((entry) => entry.path);
@@ -203,11 +203,7 @@ export function validateExport(root = repositoryRoot) {
   const actualPaths = listFiles(root);
   assert.deepEqual(
     actualPaths,
-    [
-      "export-manifest.json",
-      ...manifestPaths,
-      ...expectedRepositorySupportOverlay,
-    ].toSorted((a, b) => a.localeCompare(b)),
+    ["export-manifest.json", ...manifestPaths].toSorted((a, b) => a.localeCompare(b)),
     "public export inventory drifted",
   );
   for (const entry of manifest.files) {

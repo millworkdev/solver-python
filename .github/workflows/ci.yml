@@ -64,11 +64,12 @@ jobs:
           ARTIFACT_KIND: ${{ matrix.artifact-kind }}
         run: |
           set -euo pipefail
-          if [ "$ARTIFACT_KIND" = wheel ]; then
-            echo "path=dist/millwork_solver-0.1.0-py3-none-any.whl" >> "$GITHUB_OUTPUT"
-          else
-            echo "path=dist/millwork_solver-0.1.0.tar.gz" >> "$GITHUB_OUTPUT"
-          fi
+          # The filenames carry the version, so they come from the retained
+          # binding rather than being spelled out per release. Read with Python
+          # because this job sets up CPython only: reaching for node here would
+          # add a toolchain to a job that has no other use for one.
+          path="$(python -c 'import json,os,sys; b=json.load(open("publish-binding.json")); a=next((x for x in b.get("artifacts",[]) if x.get("kind")==os.environ["ARTIFACT_KIND"]), None); sys.exit("publish-binding.json has no %s artifact" % os.environ["ARTIFACT_KIND"]) if a is None else sys.stdout.write("dist/" + a["filename"])')"
+          echo "path=$path" >> "$GITHUB_OUTPUT"
 
       - name: Clean-install the exact retained artifact
         env:

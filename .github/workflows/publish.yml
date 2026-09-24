@@ -1,12 +1,13 @@
-# Operator-dispatched PyPI Trusted Publishing for the exact retained 0.1.0
-# candidate. This workflow never builds or repacks an artifact.
+# Operator-dispatched PyPI Trusted Publishing for the exact retained candidate
+# named by publish-binding.json. This workflow never builds or repacks an
+# artifact.
 name: publish
 
 on:
   workflow_dispatch:
     inputs:
       expected-version:
-        description: "Exact retained version (must be 0.1.0)"
+        description: "Exact retained version, exactly as publish-binding.json declares it"
         required: true
         type: string
       expected-export-sha:
@@ -65,6 +66,13 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22.14.0"
+
+      - name: Resolve the retained release version
+        id: retained
+        run: |
+          set -euo pipefail
+          version="$(node -e 'const b=require("./publish-binding.json"); if(!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(b.version||"")) { console.error("publish-binding.json declares no stable version"); process.exit(1); } process.stdout.write(b.version)')"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Verify exact export, authority input, and definitive version absence
         run: node scripts/check-publish-preconditions.mjs
@@ -162,7 +170,7 @@ jobs:
         if: ${{ !cancelled() && steps.upload.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: python-pypi-0.1.0-verification
+          name: python-pypi-${{ steps.retained.outputs.version }}-verification
           path: evidence/
           retention-days: 90
           if-no-files-found: error
