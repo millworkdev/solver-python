@@ -10,7 +10,7 @@
   "identity": {
     "distribution": "millwork-solver",
     "import_package": "millwork_solver",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "Apache-2.0",
     "supported_cpython": [
       "3.11",
@@ -21,22 +21,22 @@
   },
   "artifacts": [
     {
-      "filename": "millwork_solver-0.1.0-py3-none-any.whl",
+      "filename": "millwork_solver-0.1.1-py3-none-any.whl",
       "kind": "wheel",
-      "sha256": "e177ec7ca91edcb7f1db5f87ccfdae6d4eb3b17d0d7c3047015ad2af694bd3a7",
-      "size_bytes": 68530
+      "sha256": "7de11f2f2f54203ccadb198dbf6dacde9d06ea62fc8ca4168105eab6fbafa6c3",
+      "size_bytes": 91464
     },
     {
-      "filename": "millwork_solver-0.1.0.tar.gz",
+      "filename": "millwork_solver-0.1.1.tar.gz",
       "kind": "sdist",
-      "sha256": "bf8652181e49cbb407bf8dc59ce638e49f7ba8e268619df677cd4621021530e7",
-      "size_bytes": 15177
+      "sha256": "edf4566b6478ef6406e4ca6c6e688540d936d7dd80b036075c8faed70b43cd7e",
+      "size_bytes": 19683
     }
   ],
   "candidate_evidence": {
     "status": "READY",
-    "packet_sha256": "1640792bfae0f009efa3fe491c9da2a7d3e99788887dc3fae2116a285b2c3efb",
-    "operation_snapshot_sha256": "2b7d07eb77f32fe9913ec8391060c5773fb168add07a457b1656881f6c1c8ad2",
+    "packet_sha256": "15e3c592114eefd98404816e4e9ebdcccc12f47b17b5da39fc2d5212e58b973d",
+    "operation_snapshot_sha256": "b0016a1fc16c8cbae6ab46bedbb3384c73f71b439258b62968f9d6beb5888a1d",
     "behavior_drift_validated": true,
     "supply_chain_checks_passed": true
   },
@@ -84,28 +84,28 @@
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "892ae678248714f6b6158d27784adf555ed34128d96b456bfe8b95170a822a67",
-      "size_bytes": 3287
+      "sha256": "6c1d4c58072ab79647e01b8fc5aa366094b2d10c82f85a418d82f93691521d6f",
+      "size_bytes": 3730
     },
     {
       "path": ".github/workflows/publish.yml",
-      "sha256": "cd456c3dc92c8dd5a46707697c371da4f379cfc0148dc24dce3137e08bb4d555",
-      "size_bytes": 8450
+      "sha256": "a65da5290a831116b8c1ac04ad4c36782b4c636d3e1bd2a8db56b5f682103dcd",
+      "size_bytes": 8954
     },
     {
       "path": ".github/workflows/verify-release.yml",
-      "sha256": "1e7bafa11c1136b38ebc004ac779a813dd9302a5be6264fe45f280b3e0b28c85",
-      "size_bytes": 5926
+      "sha256": "f3a0a5d7f00cf556be1831e911c9101edafd9a82bce40b315f4ac7b57fa6d46a",
+      "size_bytes": 6560
     },
     {
-      "path": "dist/millwork_solver-0.1.0-py3-none-any.whl",
-      "sha256": "e177ec7ca91edcb7f1db5f87ccfdae6d4eb3b17d0d7c3047015ad2af694bd3a7",
-      "size_bytes": 68530
+      "path": "dist/millwork_solver-0.1.1-py3-none-any.whl",
+      "sha256": "7de11f2f2f54203ccadb198dbf6dacde9d06ea62fc8ca4168105eab6fbafa6c3",
+      "size_bytes": 91464
     },
     {
-      "path": "dist/millwork_solver-0.1.0.tar.gz",
-      "sha256": "bf8652181e49cbb407bf8dc59ce638e49f7ba8e268619df677cd4621021530e7",
-      "size_bytes": 15177
+      "path": "dist/millwork_solver-0.1.1.tar.gz",
+      "sha256": "edf4566b6478ef6406e4ca6c6e688540d936d7dd80b036075c8faed70b43cd7e",
+      "size_bytes": 19683
     },
     {
       "path": "LICENSE",
@@ -114,8 +114,8 @@
     },
     {
       "path": "publish-binding.json",
-      "sha256": "c2327771c9ae80de62e2ea6e609e59c9112c58c98dfe7c3a2f7d8a9263838402",
-      "size_bytes": 934
+      "sha256": "b7aef615c2005fd42e082d6cf1f54979605b82b5afa05b9e269de7be19368982",
+      "size_bytes": 802
     },
     {
       "path": "PUBLISHING.md",
@@ -129,18 +129,18 @@
     },
     {
       "path": "scripts/authorization-payload.mjs",
-      "sha256": "6e02f0fb0573aac67265ff3ef4e15284402dc2985b450d499c75e0bc47ca6ddc",
-      "size_bytes": 5510
+      "sha256": "b0d6323528797d90f87585a6070cbf6f4638e8ffae1482d1014394129ada11ac",
+      "size_bytes": 6324
     },
     {
       "path": "scripts/check-export.mjs",
-      "sha256": "0542665e08376572af6001f6670cb141c0a8a369296220e67acc33379d6165cd",
-      "size_bytes": 18312
+      "sha256": "f8079dd6bbf1d8ff0acecef8ef45bbb2cf0ed65aba548bbf43195a01d1fed4df",
+      "size_bytes": 19332
     },
     {
       "path": "scripts/check-publish-preconditions.mjs",
-      "sha256": "0383fee9c383c65d53d7d31705bb5a66292094332f05e7f183acf7b2204040c1",
-      "size_bytes": 7843
+      "sha256": "86137f927d3fb272855bed39327e3e664d8bce0fda5d73c97b4a9284d87cf103",
+      "size_bytes": 9485
     },
     {
       "path": "scripts/check-retained-evidence.py",
@@ -159,13 +159,13 @@
     },
     {
       "path": "scripts/test-export.mjs",
-      "sha256": "f0f5b33be6b1af3de4d5dd2cb6ac0484d18693c8904286ea73c9439d384dc2d1",
-      "size_bytes": 11818
+      "sha256": "9c3dff9ef835c669d5319410145ab0fd6e9dc3e7ffdc72c95537278b7caa17bc",
+      "size_bytes": 14181
     },
     {
       "path": "scripts/test-publish-preconditions.mjs",
-      "sha256": "8ec23e6e584ba4ad8ce2248f2ec2b853aef6d4f6ef8ae790e4d7d8bde1f68538",
-      "size_bytes": 13425
+      "sha256": "68950ce1cb7dbcf773b040c0c1d0753cbffcd3ddac5089190d127b37a3de0fcd",
+      "size_bytes": 16422
     },
     {
       "path": "scripts/test-verification-failure-path.mjs",
@@ -176,6 +176,16 @@
       "path": "scripts/verify-published-release.py",
       "sha256": "55e2dae8643c657d097534f67a3f2b9219956269080f89341d17bb8959e0cee0",
       "size_bytes": 7913
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "ccac9dbecb81517c1793f2e6b9c079109f1f757101816b12328ce57af96486ea",
+      "size_bytes": 1242
+    },
+    {
+      "path": "SUPPORT.md",
+      "sha256": "322ea7a130f8346866410457875d6914e0532c737692f18ba1c4232fa3bed74c",
+      "size_bytes": 758
     }
   ]
 }

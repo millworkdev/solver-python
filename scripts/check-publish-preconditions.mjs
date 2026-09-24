@@ -2,7 +2,8 @@
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { validateExport } from "./check-export.mjs";
 import {
   authorizationDigest,
@@ -14,11 +15,28 @@ import {
 const exactRepository = "millworkdev/solver-python";
 const exactWorkflowRef = `${exactRepository}/.github/workflows/publish.yml@refs/heads/main`;
 const exactProject = "millwork-solver";
-const exactVersion = "0.1.0";
+// The version being published is read from the retained binding that sits
+// beside this script in the export, not restated here. A second copy of the
+// version goes stale at the first release after the one it was written for,
+// and then this guard refuses the very publish it exists to authorize.
+const exactVersion = retainedVersion();
 const fullSha = /^[0-9a-f]{40}$/;
 const sha256 = /^[0-9a-f]{64}$/;
 const authorizationRef = /^https:\/\/github\.com\/millworkdev\/solver-python\/(?:issues|pull)\/\d+#issuecomment-(\d+)$/;
 const tokenEnvironmentNames = ["PYPI_API_TOKEN", "TWINE_PASSWORD", "TWINE_USERNAME"];
+
+function retainedVersion() {
+  const binding = JSON.parse(readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "..", "publish-binding.json"), "utf8"));
+  const version = binding.version;
+  assert.match(String(version), /^\d+\.\d+\.\d+$/, "the retained binding must declare a stable release version");
+  // The filenames carry the version, so a binding whose artifacts disagree with
+  // its own version field is malformed rather than merely inconsistent.
+  for (const artifact of binding.artifacts ?? []) {
+    assert.ok(String(artifact.filename).includes(version),
+      `retained artifact ${artifact.filename} does not carry the declared version ${version}`);
+  }
+  return version;
+}
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -125,6 +143,16 @@ const authorizationPayload = buildAuthorizationPayload({
   bindingBytes,
 });
 const expectedAuthorizationDigest = authorizationDigest(authorizationPayload);
+// The live-registry absence check runs before any exit path, including
+// --print-authorization-payload: publish-binding.json's own
+// publication.published only reflects this repository's dispatch history
+// (it must stay false so a second dispatch is never silently authorized),
+// not live registry reality, so it alone cannot catch an artifact that
+// published through a route this file doesn't know about. Checking the
+// registry itself here means an authorization payload can never even be
+// *prepared* for a version that already exists, not just refused at
+// upload time.
+validateRegistryResponse(await loadRegistryResponse());
 if (process.argv.includes("--print-authorization-payload")) {
   console.log(JSON.stringify({
     payload: authorizationPayload,
@@ -140,5 +168,4 @@ validateAuthorizationResponse(
   process.env,
   expectedAuthorizationDigest,
 );
-validateRegistryResponse(await loadRegistryResponse());
 console.log(`${exactProject}@${exactVersion} publish preconditions ok; no publication performed`);
