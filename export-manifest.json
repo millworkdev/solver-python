@@ -10,7 +10,7 @@
   "identity": {
     "distribution": "millwork-solver",
     "import_package": "millwork_solver",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "license": "Apache-2.0",
     "supported_cpython": [
       "3.11",
@@ -21,22 +21,22 @@
   },
   "artifacts": [
     {
-      "filename": "millwork_solver-0.1.1-py3-none-any.whl",
+      "filename": "millwork_solver-0.1.2-py3-none-any.whl",
       "kind": "wheel",
-      "sha256": "7de11f2f2f54203ccadb198dbf6dacde9d06ea62fc8ca4168105eab6fbafa6c3",
-      "size_bytes": 91464
+      "sha256": "7f3e93ac2f50a3a9bb643ec425f6b1666455c209c03abae0561b4e611a6d881f",
+      "size_bytes": 92360
     },
     {
-      "filename": "millwork_solver-0.1.1.tar.gz",
+      "filename": "millwork_solver-0.1.2.tar.gz",
       "kind": "sdist",
-      "sha256": "edf4566b6478ef6406e4ca6c6e688540d936d7dd80b036075c8faed70b43cd7e",
-      "size_bytes": 19683
+      "sha256": "460071ab8754d166d122de7e128e60a6e21a517e7c1e0529784fb45bd45056a1",
+      "size_bytes": 19720
     }
   ],
   "candidate_evidence": {
     "status": "READY",
-    "packet_sha256": "15e3c592114eefd98404816e4e9ebdcccc12f47b17b5da39fc2d5212e58b973d",
-    "operation_snapshot_sha256": "b0016a1fc16c8cbae6ab46bedbb3384c73f71b439258b62968f9d6beb5888a1d",
+    "packet_sha256": "39ed92aceef671077329d9c0377031d5772e62e5f8378b5d41cfc880d95b7387",
+    "operation_snapshot_sha256": "e80bed697f215c56da5177a31d27326fd9ed02f40ba13cda1e6271e605edd91a",
     "behavior_drift_validated": true,
     "supply_chain_checks_passed": true
   },
@@ -98,14 +98,14 @@
       "size_bytes": 6560
     },
     {
-      "path": "dist/millwork_solver-0.1.1-py3-none-any.whl",
-      "sha256": "7de11f2f2f54203ccadb198dbf6dacde9d06ea62fc8ca4168105eab6fbafa6c3",
-      "size_bytes": 91464
+      "path": "dist/millwork_solver-0.1.2-py3-none-any.whl",
+      "sha256": "7f3e93ac2f50a3a9bb643ec425f6b1666455c209c03abae0561b4e611a6d881f",
+      "size_bytes": 92360
     },
     {
-      "path": "dist/millwork_solver-0.1.1.tar.gz",
-      "sha256": "edf4566b6478ef6406e4ca6c6e688540d936d7dd80b036075c8faed70b43cd7e",
-      "size_bytes": 19683
+      "path": "dist/millwork_solver-0.1.2.tar.gz",
+      "sha256": "460071ab8754d166d122de7e128e60a6e21a517e7c1e0529784fb45bd45056a1",
+      "size_bytes": 19720
     },
     {
       "path": "LICENSE",
@@ -114,8 +114,8 @@
     },
     {
       "path": "publish-binding.json",
-      "sha256": "4b623174a5d021e85ccbf4b178b94cd123800a5e02e3df40f275b59095c98c8a",
-      "size_bytes": 956
+      "sha256": "0bc60535069016b58d71b08451d5bb98de0b555ce1e85ac66d7e5e10536e1707",
+      "size_bytes": 802
     },
     {
       "path": "PUBLISHING.md",

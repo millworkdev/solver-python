@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "binding_id": "millworkdev.solver-python.private-source-bridge.v1",
-  "status": "ready_for_operator_dispatch",
-  "version": "0.1.1",
-  "reviewed_public_export_sha": "c0bc6a18eb6e2821e04b42d2859edf40d093b813",
+  "status": "operator_evidence_required",
+  "version": "0.1.2",
+  "reviewed_public_export_sha": null,
   "private_source_assurance": {
-    "assurance_id": "millwork-solver-0.1.1-source-assurance-e8b3a0231873acac",
-    "assurance_sha256": "e8b3a0231873acac6f4d6dd77cf7159bc84b1614c22125fa052511ca49e87a55"
+    "assurance_id": null,
+    "assurance_sha256": null
   },
   "artifacts": [
     {
-      "filename": "millwork_solver-0.1.1-py3-none-any.whl",
+      "filename": "millwork_solver-0.1.2-py3-none-any.whl",
       "kind": "wheel",
-      "sha256": "7de11f2f2f54203ccadb198dbf6dacde9d06ea62fc8ca4168105eab6fbafa6c3",
-      "size_bytes": 91464
+      "sha256": "7f3e93ac2f50a3a9bb643ec425f6b1666455c209c03abae0561b4e611a6d881f",
+      "size_bytes": 92360
     },
     {
-      "filename": "millwork_solver-0.1.1.tar.gz",
+      "filename": "millwork_solver-0.1.2.tar.gz",
       "kind": "sdist",
-      "sha256": "edf4566b6478ef6406e4ca6c6e688540d936d7dd80b036075c8faed70b43cd7e",
-      "size_bytes": 19683
+      "sha256": "460071ab8754d166d122de7e128e60a6e21a517e7c1e0529784fb45bd45056a1",
+      "size_bytes": 19720
     }
   ],
   "publication": {
